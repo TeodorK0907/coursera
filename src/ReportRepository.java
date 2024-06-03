@@ -38,9 +38,6 @@ public class ReportRepository {
                     ResultSet resultSet = statement.executeQuery();
             ) {
                 List<StudentReport> reports = getStudentReports(resultSet);
-//                if (reports.size() == 0) {
-//                    sout
-//                }
                 return reports;
             }
 
@@ -68,18 +65,19 @@ public class ReportRepository {
                         "                                join coursera.courses on students_courses_xref.course_id = courses.id " +
                         "                       where completion_date >= ? " +
                         "                         and completion_date <= ? " +
-                        "group by coursera.students.pin)")
+                        "group by coursera.students.pin) " +
+                        "and completion_date >= ? " +
+                        "and completion_date <= ?")
         ) {
             statement.setDate(1, Date.valueOf(inputManager.getStartDate()));
             statement.setDate(2, Date.valueOf(inputManager.getEndDate()));
+            statement.setDate(3, Date.valueOf(inputManager.getStartDate()));
+            statement.setDate(4, Date.valueOf(inputManager.getEndDate()));
 
             try (
                     ResultSet resultSet = statement.executeQuery();
             ) {
                 List<CourseReport> reports = getCourseReports(resultSet);
-//                if (reports.size() == 0) {
-//                    sout
-//                }
                 return reports;
             }
 
