@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class InputManager {
+    private static final String EMPTY = "";
     private List<String> studentPins;
     private short minCredit;
     private LocalDate startDate;
@@ -15,6 +16,7 @@ public class InputManager {
 
     public InputManager() {
         this.studentPins = new ArrayList<>();
+        this.outputFormat = EMPTY;
     }
 
     public List<String> getStudentPins() {
