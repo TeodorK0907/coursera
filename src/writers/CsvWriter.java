@@ -9,18 +9,12 @@ import java.util.List;
 
 public class CsvWriter {
     private static final String CSV_SEPARATOR = ",";
+
     public void writeToCSV(String fileDir,
                            List<StudentReport> studentReports,
                            List<CourseReport> courseReports,
-                           List<String> studentPins)
-    //todo finish csv file formatting
-    {
-        try
-        {
-//            if (reportList.isEmpty()) {
-//                System.out.println("No results with the provided input criteria");
-//                return;
-//            }
+                           List<String> studentPins) {
+        try {
             File dir = new File(fileDir);
             dir.mkdir();
             File file = new File(dir, "report.csv");
@@ -82,42 +76,16 @@ public class CsvWriter {
                     }
                 }
             }
-//            for (OutputReport report : reportList) {
-//                StringBuilder content = new StringBuilder();
-//                content.append(report.getStudentNames());
-//                content.append(CSV_SEPARATOR);
-//                content.append(report.getTotalCredit());
-//                content.append(CSV_SEPARATOR);
-//                bw.write(content.toString());
-//                bw.newLine();
-//                for (CourseReport courseReport : report.getCouseReports()) {
-//                    String courseContent = "" +
-//                            CSV_SEPARATOR +
-//                            courseReport.getCourseName() +
-//                            CSV_SEPARATOR +
-//                            courseReport.getTotalTime() +
-//                            CSV_SEPARATOR +
-//                            courseReport.getCredit() +
-//                            CSV_SEPARATOR +
-//                            courseReport.getInstructorNames();
-//                    bw.write(courseContent);
-//                    bw.newLine();
-//                }
-//                content.append(report.getCostPrice() < 0 ? "" : report.getCostPrice());
-//                content.append(CSV_SEPARATOR);
-//                content.append(report.isVatApplicable() ? "Yes" : "No");
-//
-//            }
             bw.flush();
             bw.close();
+        } catch (UnsupportedEncodingException e) {
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
         }
-        catch (UnsupportedEncodingException e) {}
-        catch (FileNotFoundException e){}
-        catch (IOException e){}
     }
 
     private static void populateHeaders(StringBuilder csv, BufferedWriter bw) throws IOException {
-        csv.append("Student");
+        csv.append("Student Name");
         csv.append(CSV_SEPARATOR);
         csv.append("Total Credit");
         csv.append(CSV_SEPARATOR);
@@ -126,11 +94,11 @@ public class CsvWriter {
         csv.append(CSV_SEPARATOR);
         csv.append("Course Name");
         csv.append(CSV_SEPARATOR);
-        csv.append("Time");
+        csv.append("Total Time");
         csv.append(CSV_SEPARATOR);
         csv.append("Credit");
         csv.append(CSV_SEPARATOR);
-        csv.append("Instructor");
+        csv.append("Instructor Name");
         csv.append(CSV_SEPARATOR);
         bw.write(csv.toString());
         bw.newLine();
