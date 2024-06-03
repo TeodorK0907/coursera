@@ -4,13 +4,36 @@ import models.StudentReport;
 import writers.CsvWriter;
 import writers.HtmlWriter;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
+
+    private static final String INVALID_COMMAND = "please provide a valid input from the below list:" +
+            "studentPins:" +
+            "minimumCredits:" +
+            "startDate:" +
+            "endDate:" +
+            "outputFormat:" +
+            "saveTo:" +
+            " once or type \"end\" to restart the program.";
+    private static final String STUDENT_PINS = "studentPins";
+    private static final String MINIMUM_CREDITS = "minimumCredits";
+    private static final String START_DATE = "startDate";
+    private static final String END_DATE = "endDate";
+    private static final String OUTPUT_FORMAT = "outputFormat";
+    private static final String SAVE_TO = "saveTo";
+    private static final String END = "end";
+    private static final String CSV = "csv";
+    private static final String HTML = "html";
+    private static final int ZERO = 0;
+    private static final String ELEMENT_SEPARATOR = ",";
+    private static final String NO_RESULTS = "No results were found based on your search criteria. Please try again.";
+
+    public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
         InputManager inputManager = new InputManager();
@@ -20,102 +43,70 @@ public class Main {
             int separatorIndex = input.indexOf(":");
             String command = input.substring(0, separatorIndex);
             switch (command) {
-                case "studentPins":
+                case STUDENT_PINS:
                     inputManager.setStudentPins(
                             Arrays.asList
-                                    (input.substring(separatorIndex + 1).split(","))
+                                    (input.substring(separatorIndex + 1).split(ELEMENT_SEPARATOR))
                     );
                     break;
-                case "minimumCredits":
+                case MINIMUM_CREDITS:
                     inputManager.setMinCredit(Short.parseShort(input.substring(separatorIndex + 1)));
                     break;
-                case "startDate":
+                case START_DATE:
                     inputManager.setStartDate(LocalDate.parse(input.substring(separatorIndex + 1)));
                     break;
-                case "endDate":
+                case END_DATE:
                     inputManager.setEndDate(LocalDate.parse(input.substring(separatorIndex + 1)));
                     break;
-                case "outputFormat":
+                case OUTPUT_FORMAT:
                     inputManager.setOutputFormat(input.substring(separatorIndex + 1));
                     break;
-                case "saveTo":
+                case SAVE_TO:
                     inputManager.setDirPath(input.substring(separatorIndex + 1));
                     break;
                 default:
-                    System.out.println("please provide a valid input from the below list once" +
-                            " or type \"end\" to restart the program.");
+                    System.out.println(INVALID_COMMAND);
             }
             if (isInputManagerFull(inputManager)) {
                break;
             }
             input = scanner.nextLine();
         }
-        if (input.equalsIgnoreCase("end")) {
+        if (input.equalsIgnoreCase(END)) {
             return;
         }
         ReportRepository repo = new ReportRepository(inputManager);
         List<StudentReport> studentReports = repo.getStudentReport();
         List<CourseReport> courseReports = repo.getCourseCreditReport();
-//        List<OutputReport> outputReport = populateStudentReportCourses(
-//                inputManager.getStudentPins(),
-//                studentReports,
-//                courseReports);
+
+        if (studentReports.isEmpty() || courseReports.isEmpty()) {
+            System.out.println(NO_RESULTS);
+            return;
+        }
+
         CsvWriter csvWriter = new CsvWriter();
         HtmlWriter htmlWriter = new HtmlWriter();
         switch (inputManager.getOutputFormat()) {
-            case "csv":
+            case CSV:
                 csvWriter.writeToCSV(inputManager.getDirPath(),
                         studentReports, courseReports, inputManager.getStudentPins());
                 break;
-            case "html":
-              //  htmlWriter.render(inputManager.getDirPath(), studentReports, courseReports);
+            case HTML:
+                htmlWriter.writeToHTML(inputManager.getDirPath(),
+                        studentReports, courseReports, inputManager.getStudentPins());
                 break;
             default:
                 csvWriter.writeToCSV(inputManager.getDirPath(),
                         studentReports, courseReports, inputManager.getStudentPins());
-              //  htmlWriter.render(inputManager.getDirPath(), studentReports, courseReports);
+                htmlWriter.writeToHTML(inputManager.getDirPath(),
+                        studentReports, courseReports, inputManager.getStudentPins());
         }
     }
 
     private static boolean isInputManagerFull(InputManager inputManager) {
-        return (inputManager.getMinCredit() != 0)
+        return (inputManager.getMinCredit() != ZERO)
                 && (inputManager.getStartDate() != null)
                 && (inputManager.getEndDate() != null)
                 && (inputManager.getDirPath() != null);
     }
-
-//    private static List<OutputReport> populateStudentReportCourses(List<String> studentPins,
-//                                                                   List<StudentReport> studentReports,
-//                                                                   List<CourseReport> courseReports) {
-//        List<OutputReport> outputReports = new ArrayList<>();
-//        if (!studentPins.isEmpty()) {
-//            for (String pin : studentPins) {
-//                OutputReport outputReport = new OutputReport();
-//                for (StudentReport studentReport : studentReports) {
-//                    if (pin.equals(studentReport.getPin())) {
-//                        outputReport.setStudentNames(studentReport.getStudentNames());
-//                        outputReport.setTotalCredit(studentReport.getTotalCredits());
-//                    }
-//                    for (CourseReport courseReport : courseReports) {
-//                        if (pin.equals(courseReport.getPin())) {
-//                            outputReport.getCouseReports().add(courseReport);
-//                        }
-//                    }
-//                    outputReports.add(outputReport);
-//                }
-//            }
-//        } else {
-//            for (StudentReport studentReport : studentReports) {
-//                OutputReport outputReport = new OutputReport();
-//                outputReport.setStudentNames(studentReport.getStudentNames());
-//                outputReport.setTotalCredit(studentReport.getTotalCredits());
-//                for (CourseReport courseReport : courseReports) {
-//                    if (courseReport.getPin().equals(studentReport.getPin()))
-//                        outputReport.getCouseReports().add(courseReport);
-//                }
-//                outputReports.add(outputReport);
-//            }
-//        }
-//        return outputReports;
-//    }
 }
