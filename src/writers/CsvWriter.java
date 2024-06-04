@@ -2,15 +2,16 @@ package writers;
 
 import models.CourseReport;
 import models.StudentReport;
+import writers.contracts.Writer;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class CsvWriter {
+public class CsvWriter implements Writer {
     private static final String CSV_SEPARATOR = ",";
 
-    public void writeToCSV(String fileDir,
+    public void write(String fileDir,
                            List<StudentReport> studentReports,
                            List<CourseReport> courseReports,
                            List<String> studentPins) {
