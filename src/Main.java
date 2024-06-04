@@ -68,7 +68,7 @@ public class Main {
                     System.out.println(INVALID_COMMAND);
             }
             if (isInputManagerFull(inputManager)) {
-               break;
+                break;
             }
             input = scanner.nextLine();
         }
@@ -88,17 +88,17 @@ public class Main {
         HtmlWriter htmlWriter = new HtmlWriter();
         switch (inputManager.getOutputFormat()) {
             case CSV:
-                csvWriter.writeToCSV(inputManager.getDirPath(),
+                csvWriter.write(inputManager.getDirPath(),
                         studentReports, courseReports, inputManager.getStudentPins());
                 break;
             case HTML:
-                htmlWriter.writeToHTML(inputManager.getDirPath(),
+                htmlWriter.write(inputManager.getDirPath(),
                         studentReports, courseReports, inputManager.getStudentPins());
                 break;
             default:
-                csvWriter.writeToCSV(inputManager.getDirPath(),
+                csvWriter.write(inputManager.getDirPath(),
                         studentReports, courseReports, inputManager.getStudentPins());
-                htmlWriter.writeToHTML(inputManager.getDirPath(),
+                htmlWriter.write(inputManager.getDirPath(),
                         studentReports, courseReports, inputManager.getStudentPins());
         }
     }
