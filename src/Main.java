@@ -1,8 +1,11 @@
 import managers.InputManager;
 import models.CourseReport;
 import models.StudentReport;
+import repositories.contracts.ReportRepository;
+import repositories.ReportRepositoryImpl;
 import writers.CsvWriter;
 import writers.HtmlWriter;
+import writers.contracts.Writer;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -12,7 +15,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static final String INVALID_COMMAND = "please provide a valid input from the below list:" +
+    private static final String INVALID_COMMAND = "Please provide a valid input from the below list:" +
             "studentPins:" +
             "minimumCredits:" +
             "startDate:" +
@@ -31,6 +34,7 @@ public class Main {
     private static final String HTML = "html";
     private static final int ZERO = 0;
     private static final String ELEMENT_SEPARATOR = ",";
+    private static final String COMMAND_SEPARATOR = ":";
     private static final String NO_RESULTS = "No results were found based on your search criteria. Please try again.";
 
     public static void main(String[] args) throws IOException {
@@ -38,9 +42,9 @@ public class Main {
         String input = scanner.nextLine();
         InputManager inputManager = new InputManager();
 
-        while (!input.equalsIgnoreCase("end")) {
+        while (!input.equalsIgnoreCase(END)) {
 
-            int separatorIndex = input.indexOf(":");
+            int separatorIndex = input.indexOf(COMMAND_SEPARATOR);
             String command = input.substring(0, separatorIndex);
             switch (command) {
                 case STUDENT_PINS:
@@ -75,7 +79,7 @@ public class Main {
         if (input.equalsIgnoreCase(END)) {
             return;
         }
-        ReportRepository repo = new ReportRepository(inputManager);
+        ReportRepository repo = new ReportRepositoryImpl(inputManager);
         List<StudentReport> studentReports = repo.getStudentReport();
         List<CourseReport> courseReports = repo.getCourseCreditReport();
 
@@ -84,21 +88,24 @@ public class Main {
             return;
         }
 
-        CsvWriter csvWriter = new CsvWriter();
-        HtmlWriter htmlWriter = new HtmlWriter();
+        Writer writer;
         switch (inputManager.getOutputFormat()) {
             case CSV:
-                csvWriter.write(inputManager.getDirPath(),
+              writer = new CsvWriter();
+              writer.write(inputManager.getDirPath(),
                         studentReports, courseReports, inputManager.getStudentPins());
                 break;
             case HTML:
-                htmlWriter.write(inputManager.getDirPath(),
+                writer = new HtmlWriter();
+                writer.write(inputManager.getDirPath(),
                         studentReports, courseReports, inputManager.getStudentPins());
                 break;
             default:
-                csvWriter.write(inputManager.getDirPath(),
+                writer = new CsvWriter();
+                writer.write(inputManager.getDirPath(),
                         studentReports, courseReports, inputManager.getStudentPins());
-                htmlWriter.write(inputManager.getDirPath(),
+                writer = new HtmlWriter();
+                writer.write(inputManager.getDirPath(),
                         studentReports, courseReports, inputManager.getStudentPins());
         }
     }
