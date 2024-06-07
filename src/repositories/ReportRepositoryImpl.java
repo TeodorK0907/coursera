@@ -1,21 +1,25 @@
+package repositories;
+
 import managers.DbConnectionManager;
 import managers.InputManager;
 import models.CourseReport;
 import models.StudentReport;
+import repositories.contracts.ReportRepository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReportRepository {
+public class ReportRepositoryImpl implements ReportRepository {
     private final DbConnectionManager dbManager;
     private InputManager inputManager;
 
-    public ReportRepository(InputManager inputManager) {
+    public ReportRepositoryImpl(InputManager inputManager) {
         this.dbManager = new DbConnectionManager();
         this.inputManager = inputManager;
     }
 
+    @Override
     public List<StudentReport> getStudentReport() {
         try (
                 Connection connection = dbManager.connectDB();
@@ -30,6 +34,7 @@ public class ReportRepository {
                         "and coursera.courses.credit >= ? " +
                         "group by coursera.students.pin")
         ) {
+
             statement.setDate(1, Date.valueOf(inputManager.getStartDate()));
             statement.setDate(2, Date.valueOf(inputManager.getEndDate()));
             statement.setShort(3, inputManager.getMinCredit());
@@ -37,8 +42,7 @@ public class ReportRepository {
             try (
                     ResultSet resultSet = statement.executeQuery();
             ) {
-                List<StudentReport> reports = getStudentReports(resultSet);
-                return reports;
+                return getStudentReports(resultSet);
             }
 
         } catch (SQLException e) {
@@ -46,6 +50,7 @@ public class ReportRepository {
         }
     }
 
+    @Override
     public List<CourseReport> getCourseCreditReport() {
         try (
                 Connection connection = dbManager.connectDB();
@@ -77,8 +82,7 @@ public class ReportRepository {
             try (
                     ResultSet resultSet = statement.executeQuery();
             ) {
-                List<CourseReport> reports = getCourseReports(resultSet);
-                return reports;
+                return getCourseReports(resultSet);
             }
 
         } catch (SQLException e) {
