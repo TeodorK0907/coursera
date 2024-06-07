@@ -18,20 +18,7 @@ public class HtmlWriter implements Writer {
         dir.mkdir();
         File file = new File(dir, "report.html");
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));
-        StringBuilder head = new StringBuilder();
-        head.append("<!Doctype html>\n");
-        head.append("<html lang='en'>\n");
-        head.append("<style>\n");
-        head.append("table, th, td {\n");
-        head.append(" border:3px solid black;\n");
-        head.append("}\n");
-        head.append("</style>\n");
-        head.append("<head>\n");
-        head.append("<meta charset='utf-8'>\n");
-        head.append("<title>Coursera HTML report</title>\n");
-        head.append("</head>\n\n");
-        head.append("<body>\n");
-        head.append("<h1>Eligible students</h1>\n");
+        StringBuilder head = generateHtmlHead();
         bw.write(head.toString());
         populateTableHeaders(bw);
         if (!studentPins.isEmpty()) {
@@ -55,6 +42,8 @@ public class HtmlWriter implements Writer {
                 tableCloure.append("</table>\n");
                 tableCloure.append("</body>\n\n");
                 tableCloure.append("</html>");
+                bw.write(tableCloure.toString());
+                bw.newLine();
             }
         } else {
             for (StudentReport studentReport : studentReports) {
@@ -73,10 +62,30 @@ public class HtmlWriter implements Writer {
                 tableCloure.append("</table>\n");
                 tableCloure.append("</body>\n\n");
                 tableCloure.append("</html>");
+                bw.write(tableCloure.toString());
+                bw.newLine();
             }
         }
         bw.flush();
         bw.close();
+    }
+
+    private static StringBuilder generateHtmlHead() {
+        StringBuilder head = new StringBuilder();
+        head.append("<!Doctype html>\n");
+        head.append("<html lang='en'>\n");
+        head.append("<style>\n");
+        head.append("table, th, td {\n");
+        head.append(" border:3px solid black;\n");
+        head.append("}\n");
+        head.append("</style>\n");
+        head.append("<head>\n");
+        head.append("<meta charset='utf-8'>\n");
+        head.append("<title>Coursera HTML report</title>\n");
+        head.append("</head>\n\n");
+        head.append("<body>\n");
+        head.append("<h1>Eligible students</h1>\n");
+        return head;
     }
 
     private void populateCourseRows(CourseReport courseReport,
