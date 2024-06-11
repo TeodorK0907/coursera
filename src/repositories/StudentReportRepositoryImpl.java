@@ -1,5 +1,7 @@
 package repositories;
 
+import helpers.CourseQuery;
+import helpers.StudentQuery;
 import managers.DbConnectionManager;
 import managers.InputManager;
 import models.CourseReport;
@@ -13,44 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 public class StudentReportRepositoryImpl implements StudentCourseRepository {
-    private static final String STUDENT_COURSE_TOTAL_SELECT = "select sum(coursera.courses.credit) as totalCredits, " +
-            "coursera.students.pin as pins, " +
-            "concat(coursera.students.first_name, ' ', coursera.students.last_name) as fullName " +
-            "from coursera.students ";
-    private static final String STUDENT_COURSE_TOTAL_JOIN = "join coursera.students_courses_xref on coursera.students_courses_xref.student_pin = coursera.students.pin " +
-            "         join coursera.courses on students_courses_xref.course_id = courses.id ";
     private static final String SEPARATOR = ",";
-    private static final String STUDENT_COURSE_TOTAL_WHERE = "where ";
-    private static final String STUDENT_COURSE_TOTAL_WHERE_ARGS = "coursera.students_courses_xref.completion_date >= ? " +
-            "  and coursera.students_courses_xref.completion_date <= ? " +
-            "and coursera.courses.credit >= ? " +
-            "group by coursera.students.pin";
-    private static final String WILDCARD = "?";
     private final DbConnectionManager dbManager;
     private InputManager inputManager;
-    private static final String STUDENT_COURSE_CREDIT_SELECT =
-            "select coursera.courses.name as courseName, " +
-                    "       coursera.courses.total_time as totalTime, " +
-                    "       coursera.courses.credit as credit, " +
-                    "students.pin, " +
-                    "       concat(coursera.instructors.first_name, ' ', coursera.instructors.last_name) as instructor " +
-                    "from coursera.courses ";
-    private static final String STUDENT_COURSE_CREDIT_JOIN =
-            "join coursera.students_courses_xref as studentCourses on studentCourses.course_id = coursera.courses.id " +
-                    "join coursera.students as students on studentCourses.student_pin = students.pin " +
-                    "join coursera.instructors on coursera.instructors.id = coursera.courses.instructor_id ";
-    public static final String STUDENT_COURSE_CREDIT_WHERE = "where students.pin in ";
-    public static final String STUDENT_COURSE_CREDIT_INNER_SELECT =
-            "(select coursera.students.pin " +
-            "from coursera.students ";
-    private static final String STUDENT_COURSE_CREDIT_INNER_WHERE_ARGS =
-            "completion_date >= ? " +
-            "and completion_date <= ? " +
-                    "group by coursera.students.pin)";
-    private static final String STUDENT_COURSE_CREDIT_WHERE_ARGS =
-            "and coursera.courses.credit >= ? " +
-                    "group by coursera.students.pin";
-
 
     public StudentReportRepositoryImpl(InputManager inputManager) {
         this.dbManager = new DbConnectionManager();
@@ -61,11 +28,11 @@ public class StudentReportRepositoryImpl implements StudentCourseRepository {
     public List<StudentReport> getStudentReport() {
         StringBuilder query = new StringBuilder();
         Map<Integer, String> statementMap = new HashMap<>();
-        query.append(STUDENT_COURSE_TOTAL_SELECT);
-        query.append(STUDENT_COURSE_TOTAL_JOIN);
-        query.append(STUDENT_COURSE_TOTAL_WHERE);
+        query.append(StudentQuery.SELECT);
+        query.append(StudentQuery.JOIN);
+        query.append(StudentQuery.WHERE);
         getStudentPinList(inputManager.getStudentPins(), query, statementMap);
-        query.append(STUDENT_COURSE_TOTAL_WHERE_ARGS);
+        query.append(StudentQuery.WHERE_ARGS);
         try (
                 Connection connection = dbManager.connectDB();
                 PreparedStatement statement = connection.prepareStatement(query.toString())
@@ -92,14 +59,15 @@ public class StudentReportRepositoryImpl implements StudentCourseRepository {
     public List<CourseReport> getCourseCreditReport() {
         StringBuilder query = new StringBuilder();
         Map<Integer, String> statementMap = new HashMap<>();
-        query.append(STUDENT_COURSE_CREDIT_SELECT);
-        query.append(STUDENT_COURSE_CREDIT_JOIN);
-        query.append(STUDENT_COURSE_CREDIT_WHERE);
-        query.append(STUDENT_COURSE_CREDIT_INNER_SELECT);
-        query.append(STUDENT_COURSE_TOTAL_JOIN);
+        query.append(CourseQuery.SELECT);
+        query.append(CourseQuery.JOIN);
+        query.append(CourseQuery.WHERE_PINS);
+        query.append(CourseQuery.INNER_SELECT);
+        query.append(StudentQuery.JOIN);
+        query.append(CourseQuery.WHERE);
         getStudentPinList(inputManager.getStudentPins(), query, statementMap);
-        query.append(STUDENT_COURSE_CREDIT_INNER_WHERE_ARGS);
-        query.append(STUDENT_COURSE_CREDIT_WHERE_ARGS);
+        query.append(CourseQuery.INNER_WHERE_ARGS);
+        query.append(CourseQuery.WHERE_ARGS);
         try (
                 Connection connection = dbManager.connectDB();
                 PreparedStatement statement = connection.prepareStatement(query.toString())
@@ -132,11 +100,11 @@ public class StudentReportRepositoryImpl implements StudentCourseRepository {
             return;
         }
 
-        query.append("coursera.students.pin in (");
+        query.append(StudentQuery.IN_PREFIX);
 
         for (int i = 1; i <= studentPins.size(); i++) {
             if (i == studentPins.size()) {
-                query.append(WILDCARD);
+                query.append(StudentQuery.WILDCARD);
                 statementMap.put(i, studentPins.get(i - 1));
                 break;
             }
@@ -145,7 +113,7 @@ public class StudentReportRepositoryImpl implements StudentCourseRepository {
             statementMap.put(i, studentPins.get(i - 1));
         }
 
-        query.append(") and ");
+        query.append(StudentQuery.IN_SUFFIX);
     }
 
     private void setStudentPins(PreparedStatement statement,
@@ -176,8 +144,8 @@ public class StudentReportRepositoryImpl implements StudentCourseRepository {
                     courseData.getString("courseName"),
                     courseData.getShort("totalTime"),
                     courseData.getShort("credit"),
-                    courseData.getString("pin"),
-                    courseData.getString("instructor")
+                    courseData.getString("instructor"),
+                    courseData.getString("pin")
 
             );
             reports.add(report);

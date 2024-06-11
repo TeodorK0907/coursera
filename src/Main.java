@@ -2,7 +2,7 @@ import managers.InputManager;
 import models.CourseReport;
 import models.StudentReport;
 import repositories.contracts.ReportRepository;
-import repositories.ReportRepositoryImpl;
+import repositories.StudentReportRepositoryImpl;
 import writers.CsvWriter;
 import writers.HtmlWriter;
 import writers.contracts.Writer;
@@ -79,7 +79,7 @@ public class Main {
         if (input.equalsIgnoreCase(END)) {
             return;
         }
-        ReportRepository repo = new ReportRepositoryImpl(inputManager);
+        ReportRepository repo = new StudentReportRepositoryImpl(inputManager);
         List<StudentReport> studentReports = repo.getStudentReport();
         List<CourseReport> courseReports = repo.getCourseCreditReport();
 
@@ -91,22 +91,18 @@ public class Main {
         Writer writer;
         switch (inputManager.getOutputFormat()) {
             case CSV:
-              writer = new CsvWriter();
-              writer.write(inputManager.getDirPath(),
-                        studentReports, courseReports, inputManager.getStudentPins());
+                writer = new CsvWriter();
+                writer.write(inputManager.getDirPath(), studentReports, courseReports);
                 break;
             case HTML:
                 writer = new HtmlWriter();
-                writer.write(inputManager.getDirPath(),
-                        studentReports, courseReports, inputManager.getStudentPins());
+                writer.write(inputManager.getDirPath(), studentReports, courseReports);
                 break;
             default:
                 writer = new CsvWriter();
-                writer.write(inputManager.getDirPath(),
-                        studentReports, courseReports, inputManager.getStudentPins());
+                writer.write(inputManager.getDirPath(), studentReports, courseReports);
                 writer = new HtmlWriter();
-                writer.write(inputManager.getDirPath(),
-                        studentReports, courseReports, inputManager.getStudentPins());
+                writer.write(inputManager.getDirPath(), studentReports, courseReports);
         }
     }
 

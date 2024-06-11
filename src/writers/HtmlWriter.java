@@ -10,62 +10,38 @@ import java.util.List;
 
 public class HtmlWriter implements Writer {
 
+    @Override
     public void write(String fileDir,
-                            List<StudentReport> studentReports,
-                            List<CourseReport> courseReports,
-                            List<String> studentPins) throws IOException {
+                      List<StudentReport> studentReports,
+                      List<CourseReport> courseReports) throws IOException {
+
         File dir = new File(fileDir);
         dir.mkdir();
+        // create file with required name
         File file = new File(dir, "report.html");
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));
         StringBuilder head = generateHtmlHead();
         bw.write(head.toString());
         populateTableHeaders(bw);
-        if (!studentPins.isEmpty()) {
-            for (String pin : studentPins) {
-                StringBuilder studentContent = new StringBuilder();
-                for (StudentReport studentReport : studentReports) {
-                    if (pin.equals(studentReport.getPin())) {
-                        populateStudentRows(bw, studentReport, studentContent);
-                        for (CourseReport courseReport : courseReports) {
-                            StringBuilder courseContent = new StringBuilder();
-                            if (pin.equals(courseReport.getPin())) {
-                                populateCourseRows(courseReport, courseContent);
-                            }
-                            courseContent.append("</tr>\n");
-                            bw.write(courseContent.toString());
-                            bw.newLine();
-                        }
-                    }
+        for (StudentReport studentReport : studentReports) {
+            StringBuilder studentContent = new StringBuilder();
+            populateStudentRows(bw, studentReport, studentContent);
+            for (CourseReport courseReport : courseReports) {
+                StringBuilder courseContent = new StringBuilder();
+                if (studentReport.getPin().equals(courseReport.getPin())) {
+                    populateCourseRows(courseReport, courseContent);
                 }
-                StringBuilder tableCloure = new StringBuilder();
-                tableCloure.append("</table>\n");
-                tableCloure.append("</body>\n\n");
-                tableCloure.append("</html>");
-                bw.write(tableCloure.toString());
-                bw.newLine();
-            }
-        } else {
-            for (StudentReport studentReport : studentReports) {
-                StringBuilder studentContent = new StringBuilder();
-                populateStudentRows(bw, studentReport, studentContent);
-                for (CourseReport courseReport : courseReports) {
-                    StringBuilder courseContent = new StringBuilder();
-                    if (courseReport.getPin().equals(studentReport.getPin())) {
-                        populateCourseRows(courseReport, courseContent);
-                    }
-                    courseContent.append("</tr>\n");
-                    bw.write(courseContent.toString());
-                    bw.newLine();
-                }
-                StringBuilder tableCloure = new StringBuilder();
-                tableCloure.append("</table>\n");
-                tableCloure.append("</body>\n\n");
-                tableCloure.append("</html>");
-                bw.write(tableCloure.toString());
+                courseContent.append("</tr>\n");
+                bw.write(courseContent.toString());
                 bw.newLine();
             }
         }
+        StringBuilder tableCloure = new StringBuilder();
+        tableCloure.append("</table>\n");
+        tableCloure.append("</body>\n\n");
+        tableCloure.append("</html>");
+        bw.write(tableCloure.toString());
+        bw.newLine();
         bw.flush();
         bw.close();
     }

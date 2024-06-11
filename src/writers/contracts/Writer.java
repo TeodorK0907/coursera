@@ -9,6 +9,5 @@ import java.util.List;
 public interface Writer {
     void write(String fileDir,
                List<StudentReport> studentReports,
-               List<CourseReport> courseReports,
-               List<String> studentPins) throws IOException;
+               List<CourseReport> courseReports) throws IOException;
 }
